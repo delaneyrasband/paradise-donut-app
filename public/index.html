@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Paradise Donut Inventory</title>
+    <style>
+        body { font-family: Arial; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        header { background: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 30px; }
+        h1 { color: #667eea; margin: 0; }
+        .add-form { background: white; padding: 20px; border-radius: 15px; margin-bottom: 30px; }
+        input, textarea { width: 100%; padding: 10px; margin: 5px 0; border: 2px solid #ddd; border-radius: 5px; }
+        button { background: #667eea; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #764ba2; }
+        .flavors { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .flavor { background: white; padding: 20px; border-radius: 15px; }
+        .flavor h3 { color: #667eea; margin: 0 0 10px 0; }
+        .price { font-size: 1.3em; color: #764ba2; font-weight: bold; margin: 10px 0; }
+        .delete-btn { background: #dc3545; padding: 8px 15px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍩 Paradise Donut Company</h1>
+            <p>Inventory Management System</p>
+        </header>
+        
+        <div class="add-form">
+            <h2>Add New Donut Flavor</h2>
+            <form id="addForm">
+                <input type="text" id="name" placeholder="Flavor Name *" required>
+                <textarea id="desc" placeholder="Description"></textarea>
+                <input type="number" id="price" step="0.01" placeholder="Price *" required>
+                <button type="submit">Add Flavor</button>
+            </form>
+        </div>
+        
+        <div id="flavors" class="flavors"></div>
+    </div>
+    
+    <script>
+        async function loadFlavors() {
+            const res = await fetch('/api/flavors');
+            const flavors = await res.json();
+            const container = document.getElementById('flavors');
+            container.innerHTML = flavors.map(f => `
+                <div class="flavor">
+                    <h3>${f.flavor_name}</h3>
+                    <p>${f.description || 'No description'}</p>
+                    <p class="price">$${parseFloat(f.price).toFixed(2)}</p>
+                    <button class="delete-btn" onclick="deleteFlavor(${f.id})">Delete</button>
+                </div>
+            `).join('');
+        }
+        
+        document.getElementById('addForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await fetch('/api/flavors', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    flavor_name: document.getElementById('name').value,
+                    description: document.getElementById('desc').value,
+                    price: document.getElementById('price').value
+                })
+            });
+            e.target.reset();
+            loadFlavors();
+        });
+        
+        async function deleteFlavor(id) {
+            if (confirm('Delete this flavor?')) {
+                await fetch(`/api/flavors/${id}`, { method: 'DELETE' });
+                loadFlavors();
+            }
+        }
+        
+        loadFlavors();
+    </script>
+</body>
+</html>
