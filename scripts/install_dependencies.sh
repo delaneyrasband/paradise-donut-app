@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eux
 cd /home/ec2-user/paradise-donut-app
 
 # Install Node.js if needed
@@ -8,7 +9,7 @@ fi
 
 npm install
 
-# REPLACE THESE WITH YOUR ACTUAL VALUES!
+# Write ENV file
 cat > .env << EOF
 DB_HOST=paradise-donut-db-20260206182242279600000003.c7yskgwweg95.us-east-2.rds.amazonaws.com
 DB_USER=donutapp
